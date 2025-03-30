@@ -106,8 +106,8 @@ class LotionApp implements Application {
     if (!this.genesisPath) {
       this.genesisPath = join(this.home, 'config', 'genesis.json')
     }
-    let genesisJSON = fs.readFileSync(this.genesisPath, 'utf8')
-    let parsedGenesis = JSON.parse(genesisJSON)
+    const genesisJSON = fs.readFileSync(this.genesisPath, 'utf8')
+    const parsedGenesis = JSON.parse(genesisJSON)
     this.genesis = DJSON.stringify(parsedGenesis)
   }
 
@@ -176,13 +176,13 @@ class LotionApp implements Application {
       rpcPort: this.ports.rpc
     })
 
-    let appInfo = this.getAppInfo()
+    const appInfo = this.getAppInfo()
 
     return appInfo
   }
 }
 
-let Lotion: any = function(config) {
+const Lotion: any = function(config) {
   return new LotionApp(config)
 }
 

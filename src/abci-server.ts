@@ -1,11 +1,11 @@
 import djson = require('deterministic-json')
 import vstruct = require('varstruct')
 
-const { createHash } = require('crypto')
-const fs = require('fs-extra')
-const { join } = require('path')
-const createServer = require('abci')
-const merk = require('merk')
+let { createHash } = require('crypto')
+let fs = require('fs-extra')
+let { join } = require('path')
+let createServer = require('abci')
+let merk = require('merk')
 
 export interface ABCIServer {
   listen(port)
@@ -17,16 +17,16 @@ export default function createABCIServer(
   initialState,
   lotionAppHome
 ): any {
-  const stateFilePath = join(lotionAppHome, 'prev-state.json')
+  let stateFilePath = join(lotionAppHome, 'prev-state.json')
 
-  const height = 0
-  const abciServer = createServer({
+  let height = 0
+  let abciServer = createServer({
     async info(request) {
-      const stateExists = await fs.pathExists(stateFilePath)
+      let stateExists = await fs.pathExists(stateFilePath)
       if (stateExists) {
-        const stateFile
+        let stateFile
         try {
-          const stateFileJSON = await fs.readFile(stateFilePath, 'utf8')
+          let stateFileJSON = await fs.readFile(stateFilePath, 'utf8')
           stateFile = JSON.parse(stateFileJSON)
         } catch (err) {
           // TODO: warning log
@@ -34,9 +34,9 @@ export default function createABCIServer(
           return {}
         }
 
-        const rootHash = merk.hash(state)
+        let rootHash = merk.hash(state)
         if (stateFile.rootHash !== rootHash) {
-          // merk db and JSON file don't match, const's replay the chain
+          // merk db and JSON file don't match, let's replay the chain
           // TODO: warning log since we probably want to know this is happening
           return {}
         }
@@ -58,7 +58,7 @@ export default function createABCIServer(
 
     deliverTx(request) {
       try {
-        const tx = decodeTx(request.tx)
+        let tx = decodeTx(request.tx)
         try {
           stateMachine.transition({ type: 'transaction', data: tx })
           return {}
@@ -71,7 +71,7 @@ export default function createABCIServer(
     },
     checkTx(request) {
       try {
-        const tx = decodeTx(request.tx)
+        let tx = decodeTx(request.tx)
         try {
           stateMachine.check(tx)
           return {}
@@ -86,16 +86,16 @@ export default function createABCIServer(
       // ensure we don't have any changes since last commit
       merk.rollback(state)
 
-      const time = request.header.time.seconds.toNumber()
+      let time = request.header.time.seconds.toNumber()
       stateMachine.transition({ type: 'begin-block', data: { time } })
       return {}
     },
     endBlock() {
       stateMachine.transition({ type: 'block', data: {} })
-      const { validators } = stateMachine.context()
-      const validatorUpdates = []
+      let { validators } = stateMachine.context()
+      let validatorUpdates = []
 
-      for (const pubKey in validators) {
+      for (let pubKey in validators) {
         validatorUpdates.push({
           pubKey: { type: 'ed25519', data: Buffer.from(pubKey, 'base64') },
           power: { low: validators[pubKey], high: 0 }
@@ -109,7 +109,7 @@ export default function createABCIServer(
       stateMachine.commit()
       height++
 
-      const newStateFilePath = join(lotionAppHome, `state.json`)
+      let newStateFilePath = join(lotionAppHome, `state.json`)
       if (await fs.pathExists(newStateFilePath)) {
         await fs.move(newStateFilePath, stateFilePath, { overwrite: true })
       }
@@ -117,7 +117,7 @@ export default function createABCIServer(
       // it's ok if merk commit and state file don't update atomically,
       // we will just fall back to replaying the chain next time we load
       await merk.commit(state)
-      const rootHash = null
+      let rootHash = null
       try {
         // TODO: make this return null in merk instead of throwing
         rootHash = merk.hash(state)
@@ -141,7 +141,7 @@ export default function createABCIServer(
        * in next abci version, we'll get a timestamp here.
        * height is no longer tracked on info (we want to encourage isomorphic chain/channel code)
        */
-      const initialInfo = buildInitialInfo(request)
+      let initialInfo = buildInitialInfo(request)
       stateMachine.initialize(initialState, initialInfo)
       await merk.commit(state)
       return {}
@@ -155,12 +155,12 @@ export default function createABCIServer(
         return { value: Buffer.from('null'), height }
       }
 
-      const path = request.path
-      const proof = null
-      const proofHeight = height
+      let path = request.path
+      let proof = null
+      let proofHeight = height
       proof = await merk.proof(state, path)
-      const proofJSON = JSON.stringify(proof)
-      const proofBytes = Buffer.from(proofJSON)
+      let proofJSON = JSON.stringify(proof)
+      let proofBytes = Buffer.from(proofJSON)
       return {
         value: proofBytes,
         height: proofHeight
@@ -172,7 +172,7 @@ export default function createABCIServer(
 }
 
 function buildInitialInfo(initChainRequest) {
-  const result = {
+  let result = {
     validators: {}
   }
   initChainRequest.validators.forEach(validator => {
@@ -184,13 +184,13 @@ function buildInitialInfo(initChainRequest) {
   return result
 }
 
-const TxStruct = vstruct([
+let TxStruct = vstruct([
   { name: 'data', type: vstruct.VarString(vstruct.UInt32BE) },
   { name: 'nonce', type: vstruct.UInt32BE }
 ])
 
 function decodeTx(txBuffer) {
-  const decoded = TxStruct.decode(txBuffer)
-  const tx = djson.parse(decoded.data)
+  let decoded = TxStruct.decode(txBuffer)
+  let tx = djson.parse(decoded.data)
   return tx
 }

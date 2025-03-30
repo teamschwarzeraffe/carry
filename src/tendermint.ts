@@ -35,7 +35,7 @@ export default async function createTendermintProcess({
    * - p2p (public)
    * - abci (local)
    */
-  let opts: any = {
+  var opts: any = {
     rpc: { laddr: 'tcp://0.0.0.0:' + ports.rpc },
     p2p: { laddr: 'tcp://0.0.0.0:' + ports.p2p },
     proxyApp: 'tcp://127.0.0.1:' + ports.abci
@@ -52,7 +52,7 @@ export default async function createTendermintProcess({
    * no peer strings containing ids are provided.
    */
   if (peers && peers.length > 0) {
-    let shouldUseAuth = false
+    var shouldUseAuth = false
     peers.forEach(peer => {
       if (peer.indexOf('@') !== -1) {
         shouldUseAuth = true
@@ -60,8 +60,8 @@ export default async function createTendermintProcess({
     })
 
     if (!shouldUseAuth) {
-      let cfgPath = join(home, 'config', 'config.toml')
-      let configToml = fs.readFileSync(cfgPath, 'utf8')
+      var cfgPath = join(home, 'config', 'config.toml')
+      var configToml = fs.readFileSync(cfgPath, 'utf8')
       configToml = configToml.replace('auth_enc = true', 'auth_enc = false')
       fs.writeFileSync(cfgPath, configToml)
 
@@ -100,21 +100,21 @@ export default async function createTendermintProcess({
    */
 
   if (keyPath) {
-    let privValPath = join(home, 'config', 'priv_validator_key.json')
+    var privValPath = join(home, 'config', 'priv_validator_key.json')
     if (!fs.existsSync(keyPath)) {
       throw new Error(`no keys file found at ${keyPath}`)
     }
-    let newValidatorJson = fs.readJsonSync(keyPath)
-    let oldValidatorJson = fs.readJsonSync(privValPath)
+    var newValidatorJson = fs.readJsonSync(keyPath)
+    var oldValidatorJson = fs.readJsonSync(privValPath)
 
     if (newValidatorJson.pub_key.value !== oldValidatorJson.pub_key.value) {
       fs.copySync(keyPath, privValPath)
     }
   }
 
-  let closing = false
+  var closing = false
 
-  let tendermintProcess = tendermint.node(home, opts)
+  var tendermintProcess = tendermint.node(home, opts)
   if (logTendermint) {
     tendermintProcess.stdout.pipe(process.stdout)
     tendermintProcess.stderr.pipe(process.stderr)

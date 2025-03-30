@@ -1,8 +1,8 @@
-const test = require('ava')
-const lotion = require('../')
+let test = require('ava')
+let lotion = require('../')
 
 test('counter app with routes', async function(t) {
-  const app = lotion({
+  let app = lotion({
     initialState: { counter: { count: 0 } },
     p2pPort: 20000,
     rpcPort: 20001,
@@ -13,15 +13,15 @@ test('counter app with routes', async function(t) {
     state.count++
   })
 
-  const { ports, genesisPath } = await app.start()
+  let { ports, genesisPath } = await app.start()
 
-  const { state, send } = await lotion.connect(
+  let { state, send } = await lotion.connect(
     null,
     { genesis: require(genesisPath), nodes: [`ws://localhost:${ports.rpc}`] }
   )
-  const result = await send({ type: 'counter' })
+  let result = await send({ type: 'counter' })
   await delay()
-  const count = await state.counter.count
+  let count = await state.counter.count
   t.is(count, 1)
 })
 

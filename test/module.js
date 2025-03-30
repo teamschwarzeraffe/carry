@@ -1,16 +1,16 @@
-const test = require('ava')
-const lotion = require('../')
+let test = require('ava')
+let lotion = require('../')
 
 test('counter app with module api', async function(t) {
-  const rpcPort = 30001
-  const app = lotion({
+  let rpcPort = 30001
+  let app = lotion({
     p2pPort: 30000,
     rpcPort,
     abciPort: 30002,
     initialState: { count: 'foo' }
   })
 
-  const moduleA = {
+  let moduleA = {
     // `initialize` be function or array of functions
     initializers: [
       function(state, context) {
@@ -41,7 +41,7 @@ test('counter app with module api', async function(t) {
     }
   }
 
-  const moduleB = {
+  let moduleB = {
     transactionHandlers: [
       function(state, tx, context) {
         context.modules.a.increment(tx.n)
@@ -52,17 +52,17 @@ test('counter app with module api', async function(t) {
   app.use('a', moduleA)
   app.use('b', moduleB)
 
-  const { genesisPath } = await app.start()
+  let { genesisPath } = await app.start()
 
-  const { state, send } = await lotion.connect(
+  let { state, send } = await lotion.connect(
     null,
     { genesis: require(genesisPath), nodes: [`ws://localhost:${rpcPort}`] }
   )
 
-  const txCount = await state.a.transactionCount
+  let txCount = await state.a.transactionCount
   t.is(txCount, 0)
 
-  const result = await send({ type: 'a' })
+  let result = await send({ type: 'a' })
   await delay()
   txCount = await state.a.transactionCount
   t.is(txCount, 1)
@@ -72,7 +72,7 @@ test('counter app with module api', async function(t) {
   txCount = await state.a.transactionCount
   t.is(txCount, 3)
 
-  const blockCount = await state.a.blockCount
+  let blockCount = await state.a.blockCount
   t.true(blockCount > 0)
 })
 

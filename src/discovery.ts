@@ -1,4 +1,4 @@
-let DC = require('discovery-channel')
+const DC = require('discovery-channel')
 
 export interface DiscoveryServer {
   close()
@@ -10,7 +10,7 @@ interface DiscoveryInfo {
 }
 
 export default function(info: DiscoveryInfo): DiscoveryServer {
-  let channel = DC()
+  const channel = DC()
   channel.join(info.GCI, info.rpcPort)
   return {
     close() {

@@ -1,7 +1,7 @@
-let { connect } = require('../src/index')
+const { connect } = require('../src/index')
 
 async function main() {
-  let { state, send } = await connect(process.env.GCI)
+  const { state, send } = await connect(process.env.GCI)
 
   console.log(await send({ foo: 'bar', shouldError: false }))
 

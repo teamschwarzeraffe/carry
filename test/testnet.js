@@ -1,7 +1,7 @@
-let test = require('ava')
-let getPort = require('get-port')
-let lotion = require('../')
-let { RpcClient } = require('tendermint')
+const test = require('ava')
+const getPort = require('get-port')
+const lotion = require('../')
+const { RpcClient } = require('tendermint')
 
 function startApp({
   genesisPath,
@@ -10,7 +10,7 @@ function startApp({
   p2pPort,
   logTendermint = false
 }) {
-  let app = lotion({
+  const app = lotion({
     initialState: {
       txCount: 0,
       blockCount: 0,
@@ -42,38 +42,38 @@ function startApp({
 }
 
 test('counter app testnet', async function(t) {
-  let nodeA = {
+  const nodeA = {
     rpcPort: await getPort(),
     p2pPort: await getPort()
   }
-  let nodeB = {
+  const nodeB = {
     rpcPort: await getPort(),
     p2pPort: await getPort()
   }
 
-  let a = await startApp(nodeA)
-  let aRpc = RpcClient(`localhost:${nodeA.rpcPort}`)
-  let status = await aRpc.status()
+  const a = await startApp(nodeA)
+  const aRpc = RpcClient(`localhost:${nodeA.rpcPort}`)
+  const status = await aRpc.status()
 
-  let b = await startApp({
+  const b = await startApp({
     ...nodeB,
     genesisPath: a.genesisPath,
     peers: [`${status.node_info.id}@localhost:${nodeA.p2pPort}`]
   })
-  let bRpc = RpcClient(`localhost:${nodeB.rpcPort}`)
+  const bRpc = RpcClient(`localhost:${nodeB.rpcPort}`)
 
   status = await bRpc.status()
-  let bPubKey = status.validator_info.pub_key.value
+  const bPubKey = status.validator_info.pub_key.value
   t.true(status.sync_info.latest_block_height >= 1)
 
-  let alc = await lotion.connect(
+  const alc = await lotion.connect(
     null,
     {
       genesis: require(a.genesisPath),
       nodes: [`ws://localhost:${nodeA.rpcPort}`]
     }
   )
-  let blc = await lotion.connect(
+  const blc = await lotion.connect(
     null,
     {
       genesis: require(a.genesisPath),
@@ -83,7 +83,7 @@ test('counter app testnet', async function(t) {
 
   await blc.send({ pubKey: bPubKey })
 
-  let txCount = await alc.state.txCount
+  const txCount = await alc.state.txCount
   t.is(txCount, 1)
 
   await Promise.all([alc.send({ letter: 'a' }), blc.send({ letter: 'b' })])
